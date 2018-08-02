@@ -1,0 +1,154 @@
+
+<html>
+<head>
+<title>HNQIS IMCI</title>
+<meta charset="UTF-8">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+ 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  
+  
+	<script src="js/jQuery/jquery-1.9.1.min.js"></script>
+	<script src="js/jQuery/jquery-ui.min.js"></script>
+	<script src="js/jQuery/jquery.blockUI.js"></script>
+
+	<script src="js/app/util/util.js"></script>
+	<script src="js/app/util/RESTUtil.js"></script>
+	<script src="js/app/eventDetails.js"></script>
+	<script src="js/app/util/MsgManager.js"></script>
+
+
+	<link rel="stylesheet" href="css/app/style.css">
+	<link rel="stylesheet" href="css/jquery-ui.css">
+	
+ 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</head>
+
+<style>
+
+.table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 20px;
+}
+
+table {
+    background-color: transparent;
+}
+
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+    padding: 8px;
+    line-height: 1.42857143;
+    vertical-align: top;
+    border-top: 1px solid #ddd;
+}
+
+</style>
+<body>
+
+	<div id="errorMsgTb" class="page">
+		<table>
+			<tr>
+				<td rowspan="2"><img src="img/logo_banner.png" style="width:60px;"></td>
+			</tr>
+			<tr>
+				<td style="font-weight:bold; font-size:20px;">HNQIS</td>
+			</tr>
+		</table>
+		
+		<br><br>
+		<span id="errorMsg" style="font-size:18px;"></span>
+	</div>
+	
+	<div id="eventDataDiv" style="display:none;" class="page">
+		
+		<style>
+		
+		.table {
+		    width: 100%;
+		    max-width: 100%;
+		    margin-bottom: 20px;
+		}
+		
+		table {
+		    background-color: transparent;
+		}
+		
+		table {
+		    border-spacing: 0;
+		    border-collapse: collapse;
+		}
+		
+		.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+		    padding: 8px;
+		    line-height: 1.42857143;
+		    vertical-align: top;
+		    border-top: 1px solid #ddd;
+		}
+		
+		</style>
+
+		<table style="width:100%;margin-left: 10px;">
+			<tr>
+				<td rowspan="5" style="width:10px;padding-right: 10px;"><img src="img/logo_banner.png" style="width:60px;"></td>
+			</tr>
+			
+			<tr>
+				<td style="font-weight:bold; font-size:20px;">HNQIS - <span id="ouName" style="font-weight:bold; font-size:20px;"></span></td>
+			</tr>
+			
+			<tr>
+				<td style="font-weight:bold; font-size:13px;" id="eventName"></td>
+			</tr>
+			
+			<tr>
+				<td style="font-size:13px;">Assessment conducted on <span id="eventDate"></span></td>
+			</tr>
+			
+			<tr deId="M93RYt47CMK">
+				<td style="font-size:13px;">Next assessment scheduled on <span class="value"></span></td>
+			</tr>
+
+			<tr>
+				<td colspan="2" class="controlBar">
+					<br>
+					<input type="hidden" id="expandAll" value="true">
+					<span style="float:left;"><a href="#" id="collapseAllLink">[Collapse All]</a></span>
+					<span style="float:left;"><a href="#" id="expandAllLink" style="display:none;">[Expand All]</a></span>
+					<span style="float:left;margin-left:5px;"><a href="#" id="printLink">[Print]</a></span>
+					
+					<span style="float:right;padding-right:15px;">Only show failed questions <input type="checkbox" id="showFailQuestions"> </span>
+				</td>
+			</tr>
+		</table>
+		
+	
+		<table id="eventDetailsTb" class="table"></table>
+		
+		<table class="table">
+			<tr>
+				<td style="font-size:14px;border: none;">Gaps</td>
+			</tr>
+			<tr deId="lI09tJv3h4z">
+				<td class="value" style="border: none;"></td>
+			</tr>
+			<tr>
+				<td style="font-size:14px;border: none;">Action Plan</td>
+			</tr>
+			<tr deId="Im5C86I2ObV">
+				<td class="value" style="border: none;"></td>
+			</tr>
+		</table>
+		
+		<div style="color:#d8d4d4;"><input type="checkbox" id="debugModeChk" class="grayCheckbox"> Debug mode</div>
+	</div>
+</body>
+
+
+</html>
