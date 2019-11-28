@@ -33,7 +33,7 @@ public final class Util
     
     // Supper DHIS account
     public static String ACCESS_SERVER_USERNAME = "hnqis.webapp";
-    public static String ACCESS_SERVER_PASSWORD = "Qwertyuiop1";
+    public static String ACCESS_SERVER_PASSWORD = "Qwertyuiop1!";
    
     // -------------------------------------------------------------------------
     // Key words
@@ -243,6 +243,7 @@ public final class Util
         String basicAuth = "Basic " + new String( new Base64().encode( userpass.getBytes() ) );
         con.setRequestProperty( "Authorization", basicAuth );
 
+        
         // 3. Body Message Received Handle
         if ( jsonData != null && jsonData.length() > 0 )
         {
@@ -321,7 +322,7 @@ public final class Util
     public static void respondMsgOut( ResponseInfo responseInfo, HttpServletResponse response )
         throws IOException, Exception
     {
-        response.setContentType( "application/json" );
+        response.setContentType( "application/json; charset=utf-8" );
         response.setStatus( responseInfo.responseCode );
         
         PrintWriter out = response.getWriter();
