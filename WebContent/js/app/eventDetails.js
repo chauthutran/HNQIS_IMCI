@@ -19,8 +19,23 @@ function EventDetails()
 	me.BIG_FONT_SIZE = 18;
 	
 	me.DE_ID_AssessmentScheduled = "M93RYt47CMK";
+	me.DE_ID_Competency = "KesgQ5NHkQW";
 	me.DE_ID_Gap = "lI09tJv3h4z";
 	me.DE_ID_ActionPlan = "Im5C86I2ObV";
+
+	me.DE_ID_Action1_1 = "wRaxfSNz5Xb";
+	me.DE_ID_ActionResponsible_1 = "hUXusK1q7qX";
+	me.DE_ID_ActionDueDate_1 = "zAWljfTXSnZ";
+	me.DE_ID_ActionCompletionDate_1 = "bu0dDZmEqb6";
+	me.DE_ID_Action_2_1 = "uv22UMpXUA2";
+	me.DE_ID_ActionResponsible_2 = "Qor2Meb1sNf";
+	me.DE_ID_ActionDueDate_2 = "BtReGP2EMKA";
+	me.DE_ID_ActionCompletionDate_2 = "ClN8h6d1C9o";
+	me.DE_ID_Action_3_1 = "OJRW4LPDsdU";
+	me.DE_ID_ActionResponsible_3 = "z9bskG067HE";
+	me.DE_ID_ActionDueDate_3 = "bVPpgPm1hj0";
+	me.DE_ID_ActionCompletionDate_3 = "LPFqIi0Ml4a";
+
 	
 	me.ATTR_ID_DeType = "IMVz39TtAHM";
 	me.ATTR_ID_DeType_COMPOSITE_SCORE = "93";
@@ -453,7 +468,7 @@ function EventDetails()
 		{
 			var dataValue = dataValues[i];
 			
-			var valueTag = me.eventDataDivTag.find("tr[deId='" + dataValue.dataElement + "']").find(".value");
+			var valueTag = me.eventDataDivTag.find("[deId='" + dataValue.dataElement + "']").find(".value");
 			if( valueTag.length > 0 )
 			{
 				var value = dataValue.value;
@@ -477,12 +492,25 @@ function EventDetails()
 					statusTag.append( statusValueTag );
 					statusTag.closest("tr").attr("isPass", ( dataValue.value == "1" ) );
 				}
-				else if( dataValue.dataElement == me.DE_ID_AssessmentScheduled )
+				else if( dataValue.dataElement == me.DE_ID_AssessmentScheduled 
+						|| dataValue.dataElement == me.DE_ID_Competency 
+						|| dataValue.dataElement == me.DE_ID_ActionDueDate_1 
+						|| dataValue.dataElement == me.DE_ID_ActionCompletionDate_1 
+						|| dataValue.dataElement == me.DE_ID_ActionDueDate_2 
+						|| dataValue.dataElement == me.DE_ID_ActionCompletionDate_2 
+						|| dataValue.dataElement == me.DE_ID_ActionDueDate_3 
+						|| dataValue.dataElement == me.DE_ID_ActionCompletionDate_3 )
 				{
 					valueTag.html( Util.formatDate( value ) );
 				}
 				else if( dataValue.dataElement == me.DE_ID_Gap
-						|| dataValue.dataElement == me.DE_ID_ActionPlan )
+						|| dataValue.dataElement == me.DE_ID_ActionPlan
+						|| dataValue.dataElement == me.DE_ID_Action1_1 
+						|| dataValue.dataElement == me.DE_ID_ActionResponsible_1 
+						|| dataValue.dataElement == me.DE_ID_Action_2_1 
+						|| dataValue.dataElement == me.DE_ID_ActionResponsible_2 
+						|| dataValue.dataElement == me.DE_ID_Action_3_1 
+						|| dataValue.dataElement == me.DE_ID_ActionResponsible_3 )
 				{
 					valueTag.html( value );
 				}
@@ -491,7 +519,6 @@ function EventDetails()
 					me.setScoreValueAndColor( valueTag, value );
 				}
 			}
-			
 			
 		}
 		
