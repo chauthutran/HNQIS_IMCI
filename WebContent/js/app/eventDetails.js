@@ -8,7 +8,7 @@ function EventDetails()
 {
 	var me = this;
 
-	me.optionSet = {};
+	me.optionSet = [];
 	
 	me.PARAM_EVENTID = "@PARAM_EVENTID";
 	me.PARAM_SERVER = "@PARAM_SERVER";
@@ -200,9 +200,12 @@ function EventDetails()
 		RESTUtil.getAsyncData( url
 			, function( json ){
 				
+				var programName = json.deList.program.name;
+			
 				// STEP 1. Populate orgunitName, program name, ...
 				me.ouNameTag.html( json.ou.name );
-				me.eventNameTag.html( json.deList.program.name );
+				me.eventNameTag.html( programName );
+				document.title = programName;
 				
 				// STEP 2. Build event table
 				me.buildEventDataTable( json.deList.programStageDataElements );
@@ -276,6 +279,13 @@ function EventDetails()
 			var dataElement = json_DataElements[i].dataElement;
 			dataElement.compulsory = json_DataElements[i].compulsory;
 			
+			
+			// Get option set if any
+			if( dataElement.optionSet != undefined )
+			{
+				me.optionSet[dataElement.id] = dataElement.optionSet.options;
+			}
+			
 			var attrValues = dataElement.attributeValues;
 			for( var j in attrValues )
 			{
@@ -302,13 +312,9 @@ function EventDetails()
 					//STEP 5. Add TOP question in result list
 					compScoreDeList[compScore] = dataElement;
 					
-					//STEP 6. Get option set if any
-					if( dataElement.optionSet != undefined )
-					{
-						me.optionSet[dataElement.id] = dataElement.optionSet.options;
-					}
 				}
 			}
+			
 		}
 		
 		return {
@@ -472,13 +478,14 @@ function EventDetails()
 			if( valueTag.length > 0 )
 			{
 				var value = dataValue.value;
+				
 				var optionList = optionSet[dataValue.dataElement];
 				if( optionList != undefined )
 				{
 					var searched = Util.findItemFromList( optionList, "code", value );
 					if( searched != undefined )
 					{
-						dataValue = searched.name;
+						value = searched.name;
 					}
 				}
 			
@@ -493,7 +500,6 @@ function EventDetails()
 					statusTag.closest("tr").attr("isPass", ( dataValue.value == "1" ) );
 				}
 				else if( dataValue.dataElement == me.DE_ID_AssessmentScheduled 
-						|| dataValue.dataElement == me.DE_ID_Competency 
 						|| dataValue.dataElement == me.DE_ID_ActionDueDate_1 
 						|| dataValue.dataElement == me.DE_ID_ActionCompletionDate_1 
 						|| dataValue.dataElement == me.DE_ID_ActionDueDate_2 
@@ -504,6 +510,7 @@ function EventDetails()
 					valueTag.html( Util.formatDate( value ) );
 				}
 				else if( dataValue.dataElement == me.DE_ID_Gap
+						|| dataValue.dataElement == me.DE_ID_Competency 
 						|| dataValue.dataElement == me.DE_ID_ActionPlan
 						|| dataValue.dataElement == me.DE_ID_Action1_1 
 						|| dataValue.dataElement == me.DE_ID_ActionResponsible_1 

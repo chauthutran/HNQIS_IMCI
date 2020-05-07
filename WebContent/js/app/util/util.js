@@ -66,7 +66,7 @@ Util.Pinger_ping = function(ip, callback)
 // -----------------------------------------------------------------------------
 // Date
 
-Util.MONTHS = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jun", "Aug", "Sep", "Oct" ,"Nov", "Dec" ];
+Util.MONTHS = [ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct" ,"Nov", "Dec" ];
 
 Util.formatDate = function( strDate )
 {
