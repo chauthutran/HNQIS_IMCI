@@ -31,6 +31,8 @@ public class EventController
     
     private static String URL_QUERY_ORGANISATION_UNIT = "/api/organisationUnits/" + EventController.PARAM_ORGUNIT_ID + ".json?fields=name";
     
+    private static String URL_QUERY_USERS = "/api/users.json?fields=displayName&query=script_HNQIS";
+   
     
    // -------------------------------------------------------------------------
    // GET method
@@ -66,6 +68,14 @@ public class EventController
                     if( responseInfo_DeList.responseCode == 200 )
                     {
                         output += ",\"ou\":" + responseInfo_OrgUnitName.output + "";
+                                                
+                        ResponseInfo responseInfo_User = EventController.getHnqisScriptUser( server );
+
+                        if( responseInfo_User.responseCode == 200 )
+                        {
+                            output += ",\"user\":" + responseInfo_User.output + "";
+                        }
+                        
                         responseInfo.outMessage = "{" + output + "}";
                     }
                 }
@@ -142,6 +152,27 @@ public class EventController
             requestUrl = requestUrl.replace( EventController.PARAM_ORGUNIT_ID, orgUnitId );
             
             responseInfo = Util.sendRequest( Util.REQUEST_TYPE_GET, requestUrl, null, null );
+        }
+        catch ( Exception ex )
+        {
+            System.out.println( "Exception: " + ex.toString() );
+        }
+
+        return responseInfo;
+    }
+    
+
+    public static ResponseInfo getHnqisScriptUser( String server )
+        throws UnsupportedEncodingException, ServletException, IOException, Exception
+    {
+        ResponseInfo responseInfo = null;
+
+        try
+        {
+            String requestUrl = server + EventController.URL_QUERY_USERS;
+            
+            responseInfo = Util.sendRequest( Util.REQUEST_TYPE_GET, requestUrl, null, null );
+            
         }
         catch ( Exception ex )
         {

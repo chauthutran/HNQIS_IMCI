@@ -17,7 +17,7 @@ public class FeedbackServlet  extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        request.getRequestDispatcher( "/feedback.html" ).forward(request, response);
+        request.getRequestDispatcher( "/index.html" ).forward(request, response);
     }
 
 }

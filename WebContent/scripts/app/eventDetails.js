@@ -12,11 +12,9 @@ function EventDetails()
 	
 	me.PARAM_EVENTID = "@PARAM_EVENTID";
 	me.PARAM_SERVER = "@PARAM_SERVER";
+	me.PARAM_USERNAME = "@PARAM_USERNAME";
 	me._query_EventDetails = "event?eventId=" + me.PARAM_EVENTID + "&server=" + me.PARAM_SERVER;
-	
-	me.HEADER_COLOR_RANGE = ["#c2c2c2", "#d2d2d2", "#e6e6e6"];
-	me.COLOR_WHITE = "#f5f5f5";
-	me.BIG_FONT_SIZE = 18;
+	me._query_EventUserDetails = "users/" + me.PARAM_USERNAME + ".json";
 	
 	me.DE_ID_AssessmentScheduled = "M93RYt47CMK";
 	me.DE_ID_Competency = "KesgQ5NHkQW";
@@ -51,13 +49,15 @@ function EventDetails()
 
 	me.errorMsgTbTag = $("#errorMsgTb");
 	me.errorMsgTag = $("#errorMsg");
-	
+
+	me.nextAssessmentTag = $("#nextAssessment");
 	me.eventDataDivTag = $("#eventDataDiv");
 	me.ouNameTag = $("#ouName");
 	me.eventNameTag = $("#eventName");
 	me.eventDateTag = $("#eventDate");
 	me.showFailQuestionsTag = $("#showFailQuestions");
 	me.eventDetailsTbTag = $("#eventDetailsTb");
+	me.storedByTag = $("#storedBy");
 	
 	me.initialSetup = function()
 	{
@@ -114,45 +114,44 @@ function EventDetails()
 		});
 		
 		me.printLinkTag.click( function(){
-			var table = $( jQuery.parseHTML( me.eventDataDivTag.prop('outerHTML') ) );
 			
-			var originalURL = window.location.origin + window.location.pathname.replace("feedback", "");
+			// Resolve display data
+			var body = $("<div>" + $("body").html() + "</div>");
 			
-			// Add proper image logo address
-			var logoTag = table.find("img");
-			var imgAddress = originalURL + logoTag.attr("src");
-			logoTag.attr("src", imgAddress);
-			
-			// Expand ALL
-			table.find("[deId]").show();
-			table.find("[descripdeId]").hide(); // Hide description
+			// Hide description
+			body.find("[deId]").show();
+			body.find("[descripdeId]").hide(); 
 			
 			//Hide PRINT button and Hide the "Collapse All"/"Expand All" and "Only show failed questions"
-			table.find(".controlBar").hide();
-			table.find("#printLink").hide();
-			
+			body.find(".controlBar").hide();
+			body.find("#printLink").hide();
 			
 			// Hide data element ids
-			table.find(".deIdLink").hide();
+			body.find(".deIdLink").hide();
 			
 			// Hide debug mode control
-			table.find("#debugModeChk").closest( "div" ).hide();
+			body.find("#debugModeChk").closest( "div" ).hide();
 			
-			// Hide Color the score TEXT (NO BACKGROUND)
+			// Print
+			var mywindow = window.open('', 'PRINT', 'height=400,width=600');
 			
-			table.find(".scoreValue").css("color", "");
+			mywindow.document.write('<html><head>');
+			mywindow.document.write('<link rel="stylesheet" href="css/style.css">');
+			mywindow.document.write('</head><body >');
+			mywindow.document.write( body.html() );
+			mywindow.document.write('</body></html>');
 			
-			// PRINT
-			 //var printContents = table.html();
-		     // document.body.innerHTML = printContents;
-		     // window.print();
-			 
-			 var printWindow = window.open('', '');
-		     var doc = printWindow.document;
-			 doc.write(table.html());
-		    
-			 printWindow.print();
-			 printWindow.close();
+			
+			setTimeout(function () {
+				
+			
+				
+				mywindow.document.close(); // necessary for IE >= 10
+				mywindow.focus(); // necessary for IE >= 10*/
+				
+				mywindow.print();
+				mywindow.close();
+	        }, 500);
 			
 		})
 	};
@@ -200,24 +199,37 @@ function EventDetails()
 		RESTUtil.getAsyncData( url
 			, function( json ){
 				
+				if( json.user != undefined && json.user.users.length > 0 )
+				{
+					me.storedByTag.html( json.user.users[0].displayName );
+				}
+				else
+				{
+					
+					me.storedByTag.html( "[]" );
+				}
+				
 				var programName = json.deList.program.name;
 			
 				// STEP 1. Populate orgunitName, program name, ...
 				me.ouNameTag.html( json.ou.name );
 				me.eventNameTag.html( programName );
-				document.title = programName;
+//				document.title = programName;
 				
 				// STEP 2. Build event table
 				me.buildEventDataTable( json.deList.programStageDataElements );
 				
 				// STEP 3. Populate event data
 				me.populateEventData( json.event, me.optionSet );
+
+				// STEP 4. Hide empty sections
+				me.hideEmptySections();
+
 				me.eventDataDivTag.show();
 				me.errorMsgTbTag.hide();
 				
 				MsgManager.appUnblock();
 			}, function( data, b ){
-
 				
 				if( data.responseText == "" )
 				{
@@ -237,10 +249,77 @@ function EventDetails()
 						me.errorMsgTag.html("Failed to authenticate in server " + server );
 					}
 				}
+				
+				me.eventDataDivTag.show();
 				MsgManager.appUnblock();
 			}); 
 	};
-	
+
+	me.hideEmptySections = function()
+	{
+		// Show/Hide "GAP" section
+		var gapsTag = me.eventDataDivTag.find(".gaps-section");
+		if( gapsTag.find(".value").html() == "" )
+		{
+			me.eventDataDivTag.find(".gaps-section").hide();
+		}
+		else
+		{
+			me.eventDataDivTag.find(".gaps-section").show();
+		}
+		
+		// Show/ Hide "Action" sections
+		
+		var actionTag = me.eventDataDivTag.find( "[deId='" + me.DE_ID_ActionPlan + "']" );
+		var actionVal = actionTag.find("value").html();
+		if( actionVal == "" )
+		{
+			actionTag.hide();
+		}
+		else
+		{
+			actionTag.show();
+		}
+
+
+		var action1Showed = me.hideActionSection("action1");
+		var action2Showed = me.hideActionSection("action2");
+		var action3Showed = me.hideActionSection("action3");
+
+		if( action1Showed && action2Showed && action3Showed && actionVal == "" )
+		{
+			me.eventDataDivTag.find( ".action" ).hide();
+		}
+		else
+		{
+			me.eventDataDivTag.find( ".action" ).show();
+		}
+	}
+
+	me.hideActionSection = function( actionClazzName )
+	{
+		var showed = false;
+		var actionTags = me.eventDataDivTag.find( "." + actionClazzName );
+		actionTags.each( function(){
+			$(this).find("[data]").each(function(){
+				if( $(this).attr("data") != undefined && $(this).attr("data") != "" )
+				{
+					showed = true;
+				}
+			})
+		});
+
+		if( showed )
+		{
+			actionTags.show();
+		}
+		else
+		{
+			actionTags.hide();
+		}
+
+		return !showed;
+	}
 	
 	me.buildEventDataTable = function( json_DataElements )
 	{
@@ -339,22 +418,17 @@ function EventDetails()
 	
 	me.addCompScoreDERow = function( dataElement, compScore )
 	{
-		var subHeaderLevel = compScore.split(".").length
-		var style = "background-color:" + me.HEADER_COLOR_RANGE[subHeaderLevel - 1];
-		var fontSize = me.BIG_FONT_SIZE - subHeaderLevel * 2;
-		style += ";font-size:" + fontSize + "px";
-
-		style += ";font-weight:bold";
-		
+		var subHeaderLevel = compScore.split(".").length;
+		var clazz = ( subHeaderLevel === 2 ) ? "table_details__subtitle" : "table_details__title";
 		var server = me.getServerParam();
 		var editDeLink = server + "/dhis-web-maintenance/#/edit/dataElementSection/dataElement/" + dataElement.id;
 		var aLinkTag = "<span style='font-style:italic;display:none;' class='deIdLink'><a href='" + editDeLink +"' target='_blank'>(" + dataElement.id + ")</a></span>";
 		
 		
 		var rowTag = $("<tr deId='" + dataElement.id + "' showed='true'></tr>");
-		rowTag.append( "<td style='" + style + "'>" + dataElement.displayFormName + "<br>" + aLinkTag + "</td>" );
-		rowTag.append( "<td style='" + style + "'></td>" );
-		rowTag.append( "<td style='" + style + "'><span class='value' style='float:right;" + style + "'></span></td>" );
+		rowTag.append( "<td class='" + clazz + "'>" + dataElement.displayFormName + "<br>" + aLinkTag + "</td>" );
+		rowTag.append( "<td class='" + clazz + "'></td>" );
+		rowTag.append( "<td class='" + clazz + "'><span class='value' style='value scoreValue table_details__percent f_right'></span></td>" );
 		
 		me.eventDetailsTbTag.append( rowTag );
 		
@@ -390,10 +464,10 @@ function EventDetails()
 		var aLinkTag = "<span style='font-style:italic;display:none;' class='deIdLink'><a href='" + editDeLink +"' target='_blank'>(" + dataElement.id + ")</a></span>";
 		var compulsoryTag = ( dataElement.compulsory ) ? "<span style='color:red;'> *</span>" : "";
 		
-		var rowTag = $("<tr compScoreKey='" + compScore + "' class='question' deId='" + dataElement.id + "' style='cursor:pointer;background-color:" + me.COLOR_WHITE  + "'  isPass='true'></tr>");
-		rowTag.append( "<td><span class='deName'>" + dataElement.displayFormName + "</span>" + compulsoryTag + "<br>" + aLinkTag + "</td>" );
-		rowTag.append( "<td class='value realValue'></td>" );
-		rowTag.append( "<td class='status'></td>" );
+		var rowTag = $("<tr compScoreKey='" + compScore + "' class='question' deId='" + dataElement.id + "' style='cursor:pointer;'  isPass='true'></tr>");
+		rowTag.append( "<td class='table_details__child'><span class='deName'>" + dataElement.displayFormName + "</span>" + compulsoryTag + "<br>" + aLinkTag + "</td>" );
+		rowTag.append( "<td class='value realValue table_details__child'></td>" );
+		rowTag.append( "<td class='status table_details__child'></td>" );
 		
 		
 		me.eventDetailsTbTag.append( rowTag );
@@ -406,7 +480,7 @@ function EventDetails()
 	{
 		if( dataElement.description != undefined )
 		{
-			var rowTag = $("<tr style='display:none;' descripDeId='" + dataElement.id + "'></tr>");
+			var rowTag = $("<tr style='display:none;' class='table_details__question' descripDeId='" + dataElement.id + "'></tr>");
 			rowTag.append( "<td colspan='3'>" + dataElement.description + "</td>" );
 			
 			me.eventDetailsTbTag.append( rowTag );
@@ -469,15 +543,22 @@ function EventDetails()
 		
 		// STEP 2. Populate data value
 		var dataValues = eventData.dataValues;
+		var nextAssessmentVal = "None";
 		
 		for( var i in dataValues )
 		{
 			var dataValue = dataValues[i];
+			if( dataValue.dataElement == me.DE_ID_AssessmentScheduled  )
+			{
+				nextAssessmentVal = Util.formatDate( dataValue.value );
+			}
 			
 			var valueTag = me.eventDataDivTag.find("[deId='" + dataValue.dataElement + "']").find(".value");
-			if( valueTag.length > 0 )
+			
+			if ( valueTag.length > 0 )
 			{
 				var value = dataValue.value;
+				valueTag.attr( "data", value );
 				
 				var optionList = optionSet[dataValue.dataElement];
 				if( optionList != undefined )
@@ -491,16 +572,15 @@ function EventDetails()
 			
 				if( valueTag.hasClass("realValue" ) )
 				{
-					value = ( value == 1 ) ? "Yes" : "No";
+					// value = ( value == 1 ) ? "Yes" : "No";
 					valueTag.html( value );
 					
-					var statusValueTag = ( dataValue.value == "1" ) ? "<span style='color:green;float:right;'>PASS</span>" : "<span style='color:red;float:right;'>FAIL</span>";
+					var statusValueTag = ( dataValue.value == "1" ) ? "<span class='status_pass f_right'>PASS</span>" : "<span class='status_fail f_right'>FAIL</span>";
 					var statusTag = me.eventDetailsTbTag.find("tr[deId='" + dataValue.dataElement + "']").find(".status");
 					statusTag.append( statusValueTag );
 					statusTag.closest("tr").attr("isPass", ( dataValue.value == "1" ) );
 				}
-				else if( dataValue.dataElement == me.DE_ID_AssessmentScheduled 
-						|| dataValue.dataElement == me.DE_ID_ActionDueDate_1 
+				else if( dataValue.dataElement == me.DE_ID_ActionDueDate_1 
 						|| dataValue.dataElement == me.DE_ID_ActionCompletionDate_1 
 						|| dataValue.dataElement == me.DE_ID_ActionDueDate_2 
 						|| dataValue.dataElement == me.DE_ID_ActionCompletionDate_2 
@@ -526,6 +606,8 @@ function EventDetails()
 					me.setScoreValueAndColor( valueTag, value );
 				}
 			}
+		
+			me.nextAssessmentTag.text( nextAssessmentVal );
 			
 		}
 		
@@ -545,50 +627,21 @@ function EventDetails()
 			
 			if( value >= 90 )
 			{
-				color = "green";
+				color = "c_green";
 			}
 			else if( value >= 80 )
 			{
-				color = "yellow";
+				color = "c_yellow";
 			}
 			else
 			{
-				color = "red";
+				color = "c_red";
 			}
 			
 			valueTag.addClass("scoreValue", true);
-			valueTag.css( "color", color );
+			valueTag.addClass( color );
 			valueTag.html( value + "%" );
 		}
-		
-		
-		/* if( value != "" )
-		{
-			value = eval( value );
-			var color = "";
-			
-			if( value < 1 )
-			{
-				color = "#FFFFFF";
-			}
-			else if( value < 50 )
-			{
-				color = "#FF0000";
-			}
-			else if( value < 90 )
-			{
-				color = "#FFAA48";
-			}
-			else
-			{
-				color = "#00FF00";
-			}
-			
-			valueTag.addClass("scoreValue", true);
-			valueTag.css( "color", color );
-			valueTag.html( value + "%" );
-		} */
-		
 	}
 	
 	
